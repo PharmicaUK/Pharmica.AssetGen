@@ -11,6 +11,8 @@ updates:
     labels:
       - "dependencies"
       - "nuget"
+    commit-message:
+      prefix: "chore"
     groups:
       microsoft-packages:
         patterns:
@@ -30,3 +32,17 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    commit-message:
+      prefix: "chore"
+
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "sdk"
+    commit-message:
+      prefix: "chore"
+

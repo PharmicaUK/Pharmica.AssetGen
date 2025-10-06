@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "csharpier": {
+      "version": "1.1.2",
+      "commands": ["csharpier"],
+      "rollForward": false
+    },
+    "husky": {
+      "version": "0.7.2",
+      "commands": ["husky"],
+      "rollForward": false
+    },
+    "dotnet-reportgenerator-globaltool": {
+      "version": "5.4.16",
+      "commands": ["reportgenerator"],
+      "rollForward": false
+    }
+  }
+}

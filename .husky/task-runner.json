@@ -1,0 +1,25 @@
+{
+    "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+    "tasks": [
+        {
+            "name": "Format check",
+            "group": "pre-commit",
+            "command": "dotnet",
+            "args": ["csharpier", "check", "."],
+            "pathMode": "absolute",
+            "include": ["**/*.cs"]
+        },
+        {
+            "name": "commit-lint",
+            "command": "dotnet",
+            "args": [
+                "husky",
+                "exec",
+                ".husky/csx/commit-lint.csx",
+                "--args",
+                "${args}"
+            ]
+        },
+
+    ]
+}

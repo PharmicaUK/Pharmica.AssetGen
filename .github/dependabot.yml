@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "PharmicaUK"
+    labels:
+      - "dependencies"
+      - "nuget"
+    groups:
+      microsoft-packages:
+        patterns:
+          - "Microsoft.*"
+      testing-packages:
+        patterns:
+          - "TUnit*"
+          - "coverlet.*"
+          - "*Testing*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"

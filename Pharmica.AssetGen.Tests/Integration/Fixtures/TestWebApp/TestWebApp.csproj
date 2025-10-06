@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Pharmica.AssetGen.Tests.TestWebApp</RootNamespace>
+    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);../../../../.localnuget</RestoreAdditionalProjectSources>
+    <!-- Disable central package management for this test project -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- Configure AssetGen -->
+    <AssetGen_ClassName>WebAssets</AssetGen_ClassName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--  Reference the packaged generator from local NuGet feed -->
+    <!--  Version is set dynamically by integration tests via MSBuild property -->
+    <PackageReference
+      Include="Pharmica.AssetGen"
+      Version="$(AssetGenTestVersion)"
+      Condition="'$(AssetGenTestVersion)' != ''"
+    />
+    <PackageReference
+      Include="Pharmica.AssetGen"
+      Version="1.0.0"
+      Condition="'$(AssetGenTestVersion)' == ''"
+    />
+  </ItemGroup>
+  <!-- Include wwwroot files as AdditionalFiles so the generator can process them -->
+  <ItemGroup>
+    <AdditionalFiles Include="wwwroot/**/*" />
+    <Watch Include="wwwroot/**/*" />
+  </ItemGroup>
+</Project>

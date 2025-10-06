@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- Package Metadata -->
+    <PackageId>Pharmica.AssetGen</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Pharmica Ltd.</Authors>
+    <Company>Pharmica Ltd.</Company>
+    <Copyright>Copyright © Pharmica Ltd. 2025</Copyright>
+    <Description>Roslyn source generator that provides compile-time type safety for wwwroot assets in ASP.NET Core applications. Reference static assets like StaticAssets.Images.LogoPng instead of hardcoded strings, with full IntelliSense support and compile-time validation.</Description>
+    <PackageTags>roslyn;source-generator;assets;wwwroot;aspnetcore;blazor;static-files;code-generation;analyzer;csharp;dotnet;typescript-safety;compile-time</PackageTags>
+    <PackageProjectUrl>https://github.com/PharmicaUK/Pharmica.AssetGen</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PharmicaUK/Pharmica.AssetGen</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <PackageReleaseNotes>See CHANGELOG.md for release notes.</PackageReleaseNotes>
+    <!-- Repository Information -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- Deterministic Build -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'"
+      >true</ContinuousIntegrationBuild
+    >
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\" />
+    <None Include="../icon.png" Pack="true" PackagePath="\" />
+    <None Include="../LICENSE" Pack="true" PackagePath="\" />
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+  <!-- Include the generator DLL in the analyzers path for the package -->
+  <ItemGroup>
+    <None
+      Include="$(OutputPath)\$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+    />
+    <None
+      Include="$(OutputPath)\$(AssemblyName).pdb"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false"
+      Condition="Exists('$(OutputPath)\$(AssemblyName).pdb')"
+    />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+</Project>

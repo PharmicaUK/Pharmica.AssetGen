@@ -1,0 +1,116 @@
+name: Bug Report
+description: File a bug report to help us improve
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please provide as much detail as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: When I do X, Y happens instead of Z...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Install package version X.X.X
+        2. Add wwwroot files with structure...
+        3. Build project
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected the generator to create...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, I got error ASSET001...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please provide details about your development environment
+      value: |
+        - OS: [e.g., Windows 11, macOS 14.0, Ubuntu 22.04]
+        - .NET SDK Version: [e.g., 8.0.100]
+        - IDE: [e.g., Visual Studio 2022, Rider 2024.1, VS Code]
+        - Package Version: [e.g., 1.0.0]
+        - Project Type: [e.g., Blazor Server, ASP.NET Core MVC, Razor Pages]
+    validations:
+      required: true
+
+  - type: textarea
+    id: project-structure
+    attributes:
+      label: Project Structure
+      description: Share your relevant wwwroot structure and project configuration
+      placeholder: |
+        wwwroot/
+        ├── images/
+        │   └── logo.png
+        └── css/
+            └── style.css
+
+        .csproj relevant sections:
+        ```xml
+        <ItemGroup>
+          <AdditionalFiles Include="wwwroot/**/*" />
+        </ItemGroup>
+        ```
+      render: text
+
+  - type: textarea
+    id: generated-code
+    attributes:
+      label: Generated Code (if applicable)
+      description: If the generator produces code, paste it here
+      render: csharp
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Build Output / Error Messages
+      description: Paste any relevant compiler errors, warnings, or build output
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: This started happening after upgrading from version X to Y...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have provided all required information above
+          required: true

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Pharmica.AssetGen/Pharmica.AssetGen.csproj" />
+  <Project Path="Pharmica.AssetGen.Tests/Pharmica.AssetGen.Tests.csproj" />
+  <Project Path="Pharmica.AssetGen.Tests/Integration/Fixtures/TestWebApp/TestWebApp.csproj" />
+</Solution>

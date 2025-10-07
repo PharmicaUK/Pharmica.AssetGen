@@ -33,7 +33,18 @@ public static class IntegrationTestHooks
 
         if (isCI && Directory.Exists(LocalNuGetDir))
         {
-            // Use the version that the CI workflow already packed
+            // Detect version from the .nupkg file
+            var existingPackages = Directory.GetFiles(LocalNuGetDir, "Pharmica.AssetGen.*.nupkg");
+            if (existingPackages.Length > 0)
+            {
+                var packageFile = Path.GetFileName(existingPackages[0]);
+                // Extract version from filename: Pharmica.AssetGen.1.0.1.nupkg -> 1.0.1
+                var version = packageFile.Replace("Pharmica.AssetGen.", "").Replace(".nupkg", "");
+                TestVersion = version;
+                return;
+            }
+
+            // Fallback to 0.0.0-ci if no package found
             TestVersion = "0.0.0-ci";
             return;
         }

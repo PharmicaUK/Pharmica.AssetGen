@@ -43,6 +43,7 @@
     <None Include="../README.md" Pack="true" PackagePath="\" />
     <None Include="../icon.png" Pack="true" PackagePath="\" />
     <None Include="../LICENSE" Pack="true" PackagePath="\" />
+    <None Include="build/Pharmica.AssetGen.props" Pack="true" PackagePath="build" />
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
   </ItemGroup>
   <!-- Include the generator DLL in the analyzers path for the package -->

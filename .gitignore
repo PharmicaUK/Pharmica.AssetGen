@@ -131,6 +131,9 @@ publish/
 # NuGet Packages Directory
 packages/
 
+# Local NuGet feed for integration tests
+.localnuget/
+
 # Windows Azure Build Output
 csx
 !.husky/csx

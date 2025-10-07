@@ -26,6 +26,19 @@ public static class IntegrationTestHooks
     [Before(TestSession)]
     public static async Task OneTimeSetup()
     {
+        // In CI, use the pre-packed version from workflow
+        var isCI =
+            Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true"
+            || Environment.GetEnvironmentVariable("CI") == "true";
+
+        if (isCI && Directory.Exists(LocalNuGetDir))
+        {
+            // Use the version that the CI workflow already packed
+            TestVersion = "0.0.0-ci";
+            return;
+        }
+
+        // Local development: pack a unique test version
         Directory.CreateDirectory(LocalNuGetDir);
 
         TestVersion = $"1.0.0-test-{DateTime.UtcNow:yyyyMMddHHmmss}";

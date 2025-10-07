@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="Pharmica.AssetGen/Pharmica.AssetGen.csproj" />
   <Project Path="Pharmica.AssetGen.Tests/Pharmica.AssetGen.Tests.csproj" />
-  <Project Path="Pharmica.AssetGen.Tests/Integration/Fixtures/TestWebApp/TestWebApp.csproj" />
+  <!-- TestWebApp is built by integration tests, not by normal solution build -->
 </Solution>

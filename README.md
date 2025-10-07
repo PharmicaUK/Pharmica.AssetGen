@@ -1,4 +1,4 @@
-![Pharmica.AssetGen Banner](banner.png)
+<img width="1280" height="446" alt="banner" src="https://github.com/user-attachments/assets/7f9a09cf-d75b-41bd-a715-7d93160792a4" />
 
 [![NuGet](https://img.shields.io/nuget/v/Pharmica.AssetGen.svg)](https://www.nuget.org/packages/Pharmica.AssetGen/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Pharmica.AssetGen.svg)](https://www.nuget.org/packages/Pharmica.AssetGen/)

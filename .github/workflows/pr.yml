@@ -1,0 +1,144 @@
+name: Pull Request CI
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        global-json-file: global.json
+
+    - name: Pack generator for integration tests
+      run: |
+        mkdir -p .localnuget
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=0.0.0-ci
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Restore tools
+      run: dotnet tool restore
+
+    - name: Check code formatting
+      run: dotnet csharpier check .
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run tests
+      run: |
+        dotnet test --configuration Release --no-build --verbosity minimal -- \
+          --report-trx \
+          --report-trx-filename "test-results.trx" \
+          --coverage \
+          --coverage-output-format cobertura \
+          --coverage-output "coverage.cobertura.xml"
+
+    - name: Code Coverage Report
+      if: always()
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: '**/TestResults/coverage.cobertura.xml'
+        badge: true
+        fail_below_min: false
+        format: markdown
+        hide_branch_rate: false
+        hide_complexity: false
+        indicators: true
+        output: both
+        thresholds: '60 80'
+
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: always() && github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: code-coverage-results.md
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          **/test-results.trx
+          **/coverage.cobertura.xml
+          **/TestResults/**
+        retention-days: 5
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/*.trx
+        check_name: Test Results
+        comment_mode: off
+
+  lint-commits:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check commit messages
+      uses: wagoid/commitlint-github-action@v6
+      with:
+        configFile: .commitlintrc.json
+
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: csharp
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        global-json-file: global.json
+
+    - name: Pack generator for CodeQL
+      run: |
+        mkdir -p .localnuget
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=0.0.0-ci
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3

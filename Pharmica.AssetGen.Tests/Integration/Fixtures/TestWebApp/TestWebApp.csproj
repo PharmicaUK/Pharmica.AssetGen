@@ -8,8 +8,6 @@
     <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);../../../../.localnuget</RestoreAdditionalProjectSources>
     <!-- Disable central package management for this test project -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-    <!-- Configure AssetGen -->
-    <AssetGen_ClassName>WebAssets</AssetGen_ClassName>
   </PropertyGroup>
   <ItemGroup>
     <!--  Reference the packaged generator from local NuGet feed -->
@@ -21,7 +19,7 @@
     />
     <PackageReference
       Include="Pharmica.AssetGen"
-      Version="1.0.0"
+      Version="0.0.0-ci"
       Condition="'$(AssetGenTestVersion)' == ''"
     />
   </ItemGroup>

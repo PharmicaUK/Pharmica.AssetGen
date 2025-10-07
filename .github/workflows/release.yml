@@ -1,0 +1,148 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Create Release and Publish
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.nuget.org/packages/Pharmica.AssetGen
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        global-json-file: global.json
+
+    - name: Pack generator for integration tests
+      run: |
+        mkdir -p .localnuget
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=1.0.0
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Restore tools
+      run: dotnet tool restore
+
+    - name: Check code formatting
+      run: dotnet csharpier check .
+
+    - name: Set version
+      id: set-version
+      run: |
+        VERSION="${{ github.ref_name }}"
+        VERSION="${VERSION#v}"
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Publishing version: $VERSION"
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.set-version.outputs.VERSION }}
+
+    - name: Run tests
+      run: |
+        dotnet test --configuration Release --no-build --verbosity minimal -- \
+          --report-trx \
+          --report-trx-filename "test-results.trx"
+
+    - name: Pack
+      run: dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --no-build --output ./artifacts /p:Version=${{ steps.set-version.outputs.VERSION }}
+
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "${{ github.ref_name }}" | head -n 1)
+
+        if [ -z "$PREVIOUS_TAG" ]; then
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+
+        echo "Generating changelog from $PREVIOUS_TAG to ${{ github.ref_name }}"
+
+        # Generate changelog content
+        cat > RELEASE_NOTES.md << 'EOF'
+        # What's Changed
+
+        EOF
+
+        # Get commits since last tag and categorize them
+        git log $PREVIOUS_TAG..${{ github.ref_name }} --pretty=format:"%s" | while read commit; do
+          case "$commit" in
+            feat:*|feat\(*)
+              echo "### ✨ Features" >> FEATURES.tmp
+              echo "- ${commit#feat*: }" >> FEATURES.tmp
+              ;;
+            fix:*|fix\(*)
+              echo "### 🐛 Bug Fixes" >> FIXES.tmp
+              echo "- ${commit#fix*: }" >> FIXES.tmp
+              ;;
+            perf:*|perf\(*)
+              echo "### ⚡ Performance" >> PERF.tmp
+              echo "- ${commit#perf*: }" >> PERF.tmp
+              ;;
+            docs:*|docs\(*)
+              echo "### 📚 Documentation" >> DOCS.tmp
+              echo "- ${commit#docs*: }" >> DOCS.tmp
+              ;;
+            refactor:*|refactor\(*)
+              echo "### ♻️ Refactoring" >> REFACTOR.tmp
+              echo "- ${commit#refactor*: }" >> REFACTOR.tmp
+              ;;
+            test:*|test\(*)
+              echo "### ✅ Tests" >> TESTS.tmp
+              echo "- ${commit#test*: }" >> TESTS.tmp
+              ;;
+            build:*|build\(*|ci:*|ci\(*)
+              echo "### 🔧 Build & CI" >> BUILD.tmp
+              echo "- ${commit#*: }" >> BUILD.tmp
+              ;;
+          esac
+        done
+
+        # Combine sections in order
+        for file in FEATURES.tmp FIXES.tmp PERF.tmp DOCS.tmp REFACTOR.tmp TESTS.tmp BUILD.tmp; do
+          if [ -f "$file" ]; then
+            cat "$file" | sort -u >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+          fi
+        done
+
+        # Add full changelog link
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...${{ github.ref_name }}" >> RELEASE_NOTES.md
+
+        # Clean up temp files
+        rm -f *.tmp
+
+        cat RELEASE_NOTES.md
+
+    - name: Push to NuGet
+      run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: RELEASE_NOTES.md
+        files: ./artifacts/*.nupkg
+        generate_release_notes: false
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/*.nupkg
+        retention-days: 90

@@ -12,6 +12,7 @@ namespace Pharmica.AssetGen.Tests.Integration;
 /// Integration tests that verify the source generator works end-to-end
 /// by compiling a real ASP.NET Core project and inspecting generated files.
 /// </summary>
+[NotInParallel]
 public class IntegrationTests
 {
     private static readonly string SolutionRoot = Path.GetFullPath(
@@ -171,6 +172,7 @@ public class IntegrationTests
             "build",
             TestWebAppProject,
             "Building with emitted files",
+            "--configuration Release",
             "-p:EmitCompilerGeneratedFiles=true",
             $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );

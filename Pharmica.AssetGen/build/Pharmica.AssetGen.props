@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Default value for AssetGen_ClassName -->
+    <AssetGen_ClassName Condition="'$(AssetGen_ClassName)' == ''">StaticAssets</AssetGen_ClassName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Make the property available to the source generator -->
+    <CompilerVisibleProperty Include="AssetGen_ClassName" />
+  </ItemGroup>
+</Project>

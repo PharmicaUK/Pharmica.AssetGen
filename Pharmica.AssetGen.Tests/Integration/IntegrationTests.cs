@@ -194,4 +194,192 @@ public class IntegrationTests
             .Distinct()
             .ToList();
     }
+
+    private static async Task<List<string>> FindGeneratedSourceFiles(
+        string projectPath,
+        string objDir,
+        string classNamePattern
+    )
+    {
+        await RunDotnetCommand(
+            "build",
+            projectPath,
+            "Building with emitted files",
+            "--configuration Release",
+            "-p:EmitCompilerGeneratedFiles=true",
+            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+        );
+
+        if (!Directory.Exists(objDir))
+        {
+            return [];
+        }
+
+        return Directory
+            .GetFiles(objDir, "*.g.cs", SearchOption.AllDirectories)
+            .Concat(
+                Directory.GetFiles(objDir, $"*{classNamePattern}*.cs", SearchOption.AllDirectories)
+            )
+            .Distinct()
+            .ToList();
+    }
+}
+
+/// <summary>
+/// Integration tests for custom class name configuration
+/// </summary>
+[NotInParallel]
+public class CustomClassNameTests
+{
+    private static readonly string SolutionRoot = Path.GetFullPath(
+        Path.Combine(AppContext.BaseDirectory, "../../../..")
+    );
+    private static readonly string CustomClassNameAppProject = Path.Combine(
+        SolutionRoot,
+        "Pharmica.AssetGen.Tests/Integration/Fixtures/CustomClassNameApp/CustomClassNameApp.csproj"
+    );
+    private static readonly string CustomClassNameAppObjDir = Path.Combine(
+        SolutionRoot,
+        "Pharmica.AssetGen.Tests/Integration/Fixtures/CustomClassNameApp/obj"
+    );
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        await RunDotnetCommand(
+            "clean",
+            CustomClassNameAppProject,
+            "Cleaning CustomClassNameApp",
+            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+        );
+    }
+
+    [Test]
+    public async Task CustomClassName_GeneratesCorrectClassName()
+    {
+        var buildResult = await RunDotnetCommand(
+            "build",
+            CustomClassNameAppProject,
+            "Building CustomClassNameApp",
+            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+        );
+
+        await Assert
+            .That(buildResult.ExitCode)
+            .IsEqualTo(0)
+            .Because($"Build failed with errors:\n{buildResult.Output}");
+
+        var generatedFiles = await FindGeneratedSourceFiles(
+            CustomClassNameAppProject,
+            CustomClassNameAppObjDir,
+            "MyCustomAssets"
+        );
+
+        var assetFile = generatedFiles.FirstOrDefault(f => f.Contains("MyCustomAssets"));
+        await Assert.That(assetFile).IsNotNull().Because("MyCustomAssets generated file not found");
+
+        var generatedCode = await File.ReadAllTextAsync(assetFile!);
+        await Assert
+            .That(generatedCode)
+            .Contains("class MyCustomAssets")
+            .Because("Generated file should contain custom class name");
+    }
+
+    [Test]
+    public async Task CustomClassName_GeneratesCorrectNamespace()
+    {
+        var generatedFiles = await FindGeneratedSourceFiles(
+            CustomClassNameAppProject,
+            CustomClassNameAppObjDir,
+            "MyCustomAssets"
+        );
+        var assetFile = generatedFiles.FirstOrDefault(f => f.Contains("MyCustomAssets"));
+        await Assert.That(assetFile).IsNotNull();
+
+        var generatedCode = await File.ReadAllTextAsync(assetFile!);
+        await Assert
+            .That(generatedCode)
+            .Contains("namespace CustomClassNameApp")
+            .Because("Generated file should use assembly name as namespace");
+    }
+
+    [Test]
+    public async Task CustomClassName_ContainsExpectedAssets()
+    {
+        var generatedFiles = await FindGeneratedSourceFiles(
+            CustomClassNameAppProject,
+            CustomClassNameAppObjDir,
+            "MyCustomAssets"
+        );
+        var assetFile = generatedFiles.FirstOrDefault(f => f.Contains("MyCustomAssets"));
+        var generatedCode = await File.ReadAllTextAsync(assetFile!);
+
+        await Assert.That(generatedCode).Contains("class Assets");
+        await Assert.That(generatedCode).Contains("TestTxt");
+        await Assert.That(generatedCode).Contains("\"/assets/test.txt\"");
+    }
+
+    private static async Task<(int ExitCode, string Output)> RunDotnetCommand(
+        string command,
+        string projectPath,
+        string description,
+        params string[] additionalArgs
+    )
+    {
+        var args = $"{command} \"{projectPath}\" {string.Join(" ", additionalArgs)}";
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = args,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+        {
+            throw new InvalidOperationException(
+                $"Failed to start dotnet process for: {description}"
+            );
+        }
+
+        var output = await process.StandardOutput.ReadToEndAsync();
+        var error = await process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+
+        var fullOutput = output + "\n" + error;
+        return (process.ExitCode, fullOutput);
+    }
+
+    private static async Task<List<string>> FindGeneratedSourceFiles(
+        string projectPath,
+        string objDir,
+        string classNamePattern
+    )
+    {
+        await RunDotnetCommand(
+            "build",
+            projectPath,
+            "Building with emitted files",
+            "--configuration Release",
+            "-p:EmitCompilerGeneratedFiles=true",
+            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+        );
+
+        if (!Directory.Exists(objDir))
+        {
+            return [];
+        }
+
+        return Directory
+            .GetFiles(objDir, "*.g.cs", SearchOption.AllDirectories)
+            .Concat(
+                Directory.GetFiles(objDir, $"*{classNamePattern}*.cs", SearchOption.AllDirectories)
+            )
+            .Distinct()
+            .ToList();
+    }
 }

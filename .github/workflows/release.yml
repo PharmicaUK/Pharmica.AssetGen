@@ -28,10 +28,18 @@ jobs:
         dotnet-version: '9.0.x'
         global-json-file: global.json
 
+    - name: Set version
+      id: set-version
+      run: |
+        VERSION="${{ github.ref_name }}"
+        VERSION="${VERSION#v}"
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Publishing version: $VERSION"
+
     - name: Pack generator for integration tests
       run: |
         mkdir -p .localnuget
-        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=1.0.0
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=${{ steps.set-version.outputs.VERSION }}
 
     - name: Restore dependencies
       run: dotnet restore
@@ -41,14 +49,6 @@ jobs:
 
     - name: Check code formatting
       run: dotnet csharpier check .
-
-    - name: Set version
-      id: set-version
-      run: |
-        VERSION="${{ github.ref_name }}"
-        VERSION="${VERSION#v}"
-        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Publishing version: $VERSION"
 
     - name: Build
       run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.set-version.outputs.VERSION }}

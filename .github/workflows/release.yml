@@ -147,7 +147,7 @@ jobs:
         generate_release_notes: false
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: nuget-packages
         path: ./artifacts/*.nupkg

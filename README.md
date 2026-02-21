@@ -126,6 +126,28 @@ By default, the generated class is named `StaticAssets`. You can customize this 
 
 Then use: `WebAssets.Images.LogoPng`
 
+### Path Base
+
+By default, generated paths start with `/` (e.g., `/images/logo.png`). If your application is hosted under a sub-path, you can configure a path base:
+
+```xml
+<PropertyGroup>
+  <AssetGen_PathBase>/admin/v3</AssetGen_PathBase>
+</PropertyGroup>
+```
+
+This generates paths like `/admin/v3/images/logo.png` instead of `/images/logo.png`.
+
+To generate relative paths (no leading slash), set the path base to `.`:
+
+```xml
+<PropertyGroup>
+  <AssetGen_PathBase>.</AssetGen_PathBase>
+</PropertyGroup>
+```
+
+This generates `images/logo.png` — useful for Blazor WebAssembly or other scenarios where relative paths are needed.
+
 ### File Extension Handling
 
 By default, file extensions are "flattened" into PascalCase:

@@ -255,6 +255,41 @@ Consider using different file names or folder structure.
 </PropertyGroup>
 ```
 
+## Working with Bundled Assets
+
+If you use a front-end bundler (esbuild, webpack, Vite, Parcel, etc.) that outputs files into `wwwroot`, those files must exist **before** `dotnet build` runs — otherwise the source generator won't see them.
+
+### The Problem
+
+Roslyn source generators run during compilation. If your bundler hasn't written its output to `wwwroot` yet, the generator has nothing to pick up and the corresponding constants won't be generated.
+
+### The Solution
+
+Run your front-end build as a separate step **before** `dotnet build`. Most task runners (Taskfile, Make, Just, etc.) make this straightforward:
+
+```bash
+# Build front-end assets first
+npm run build
+
+# Then build the .NET project
+dotnet build
+```
+
+In CI/CD pipelines like GitHub Actions, split these into separate steps:
+
+```yaml
+- name: Install Node dependencies
+  run: npm ci
+
+- name: Build front-end assets
+  run: npm run build
+
+- name: Build .NET project
+  run: dotnet build
+```
+
+> **Tip:** The same principle applies to any tool that generates files into `wwwroot` — Sass/LESS compilers, image optimizers, etc. Just make sure they run before `dotnet build`.
+
 ## Troubleshooting
 
 ### Generator Not Running

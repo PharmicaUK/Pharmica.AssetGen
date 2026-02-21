@@ -24,13 +24,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Pack generator for integration tests
       run: |
         mkdir -p .localnuget
-        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=0.0.0-ci
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget -p:Version=0.0.0-ci
 
     - name: Restore dependencies
       run: dotnet restore
@@ -46,7 +46,7 @@ jobs:
 
     - name: Run tests
       run: |
-        dotnet test --configuration Release --no-build --verbosity minimal -- \
+        dotnet test --configuration Release --no-build --verbosity minimal \
           --report-trx \
           --report-trx-filename "test-results.trx" \
           --coverage \
@@ -129,13 +129,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Pack generator for CodeQL
       run: |
         mkdir -p .localnuget
-        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=0.0.0-ci
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget -p:Version=0.0.0-ci
 
     - name: Build
       run: dotnet build --configuration Release

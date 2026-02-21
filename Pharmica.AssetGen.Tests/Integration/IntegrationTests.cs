@@ -34,7 +34,7 @@ public class IntegrationTests
             "clean",
             TestWebAppProject,
             "Cleaning TestWebApp",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
     }
 
@@ -45,7 +45,7 @@ public class IntegrationTests
             "build",
             TestWebAppProject,
             "Building TestWebApp",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         await Assert
@@ -116,7 +116,7 @@ public class IntegrationTests
             TestWebAppProject,
             "Building TestWebApp in Release",
             "--configuration Release",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         await Assert
@@ -174,7 +174,7 @@ public class IntegrationTests
             "Building with emitted files",
             "--configuration Release",
             "-p:EmitCompilerGeneratedFiles=true",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         if (!Directory.Exists(TestWebAppObjDir))
@@ -207,7 +207,7 @@ public class IntegrationTests
             "Building with emitted files",
             "--configuration Release",
             "-p:EmitCompilerGeneratedFiles=true",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         if (!Directory.Exists(objDir))
@@ -250,7 +250,7 @@ public class CustomClassNameTests
             "clean",
             CustomClassNameAppProject,
             "Cleaning CustomClassNameApp",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
     }
 
@@ -261,7 +261,7 @@ public class CustomClassNameTests
             "build",
             CustomClassNameAppProject,
             "Building CustomClassNameApp",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         await Assert
@@ -366,7 +366,7 @@ public class CustomClassNameTests
             "Building with emitted files",
             "--configuration Release",
             "-p:EmitCompilerGeneratedFiles=true",
-            $"/p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
+            $"-p:AssetGenTestVersion={IntegrationTestHooks.TestVersion}"
         );
 
         if (!Directory.Exists(objDir))

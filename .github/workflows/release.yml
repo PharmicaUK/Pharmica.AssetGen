@@ -26,7 +26,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Set version
@@ -40,7 +40,7 @@ jobs:
     - name: Pack generator for integration tests
       run: |
         mkdir -p .localnuget
-        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget /p:Version=${{ steps.set-version.outputs.VERSION }}
+        dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --output .localnuget -p:Version=${{ steps.set-version.outputs.VERSION }}
 
     - name: Restore dependencies
       run: dotnet restore
@@ -52,16 +52,16 @@ jobs:
       run: dotnet csharpier check .
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.set-version.outputs.VERSION }}
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.set-version.outputs.VERSION }}
 
     - name: Run tests
       run: |
-        dotnet test --configuration Release --no-build --verbosity minimal -- \
+        dotnet test --configuration Release --no-build --verbosity minimal \
           --report-trx \
           --report-trx-filename "test-results.trx"
 
     - name: Pack
-      run: dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --no-build --output ./artifacts /p:Version=${{ steps.set-version.outputs.VERSION }}
+      run: dotnet pack Pharmica.AssetGen/Pharmica.AssetGen.csproj --configuration Release --no-build --output ./artifacts -p:Version=${{ steps.set-version.outputs.VERSION }}
 
     - name: Generate Changelog
       id: changelog

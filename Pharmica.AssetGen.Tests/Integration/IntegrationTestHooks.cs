@@ -60,7 +60,7 @@ public static class IntegrationTestHooks
             "Packing generator as NuGet",
             $"-o \"{LocalNuGetDir}\"",
             "--configuration Release",
-            $"/p:Version={TestVersion}"
+            $"-p:Version={TestVersion}"
         );
 
         if (packResult.ExitCode != 0)
@@ -78,18 +78,21 @@ public static class IntegrationTestHooks
             );
         }
 
+        // Clear the HTTP cache so NuGet fetches the freshly-packed local package.
+        // Only clear the HTTP cache — clearing the global packages folder often fails
+        // on Windows because MSBuild/SourceLink DLLs are locked by the build process.
         var clearResult = await RunDotnetCommand(
             "nuget",
             "locals",
-            "Clearing NuGet cache",
-            "all",
+            "Clearing NuGet HTTP cache",
+            "http-cache",
             "--clear"
         );
 
         if (clearResult.ExitCode != 0)
         {
-            throw new InvalidOperationException(
-                $"Failed to clear NuGet cache:\n{clearResult.Output}"
+            Console.Error.WriteLine(
+                $"Warning: Failed to clear NuGet HTTP cache (tests may still pass with unique version):\n{clearResult.Output}"
             );
         }
     }

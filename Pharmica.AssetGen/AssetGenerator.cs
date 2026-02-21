@@ -43,6 +43,23 @@ public sealed class AssetGenerator : IIncrementalGenerator
             }
         );
 
+        var pathBaseProvider = configProvider.Select(
+            (config, _) =>
+            {
+                if (
+                    config.GlobalOptions.TryGetValue(
+                        "build_property.AssetGen_PathBase",
+                        out var pathBase
+                    ) && !string.IsNullOrEmpty(pathBase)
+                )
+                {
+                    return pathBase;
+                }
+
+                return "/";
+            }
+        );
+
         var assetData = assetFiles
             .Combine(configProvider)
             .Select(
@@ -81,11 +98,16 @@ public sealed class AssetGenerator : IIncrementalGenerator
         IncrementalValueProvider<(
             ImmutableArray<AssetInfo> Assets,
             string RootNamespace,
-            string ClassName
+            string ClassName,
+            string PathBase
         )> input = collected
             .Combine(rootNsProvider)
             .Combine(classNameProvider)
-            .Select((tuple, _) => (tuple.Left.Left, tuple.Left.Right, tuple.Right));
+            .Combine(pathBaseProvider)
+            .Select(
+                (tuple, _) =>
+                    (tuple.Left.Left.Left, tuple.Left.Left.Right, tuple.Left.Right, tuple.Right)
+            );
 
         ctx.RegisterSourceOutput(
             input,
@@ -94,6 +116,7 @@ public sealed class AssetGenerator : IIncrementalGenerator
                 var assets = data.Assets;
                 var rootNs = data.RootNamespace;
                 var className = data.ClassName;
+                var pathBase = data.PathBase;
 
                 if (assets.IsEmpty)
                 {
@@ -145,7 +168,7 @@ public sealed class AssetGenerator : IIncrementalGenerator
                 sb.AppendLine($"namespace {rootNs};");
                 sb.AppendLine();
 
-                GenerateClass(sb, root, 0);
+                GenerateClass(sb, root, 0, pathBase);
 
                 spc.AddSource($"{className}.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
             }
@@ -220,7 +243,7 @@ public sealed class AssetGenerator : IIncrementalGenerator
         }
     }
 
-    static void GenerateClass(StringBuilder sb, AssetNode node, int indent)
+    static void GenerateClass(StringBuilder sb, AssetNode node, int indent, string pathBase)
     {
         var indentStr = new string(' ', indent * 4);
 
@@ -248,6 +271,16 @@ public sealed class AssetGenerator : IIncrementalGenerator
                 webPath = webPath.Substring(wwwrootIdx + DefaultRootDirectory.Length + 1);
             }
 
+            var relativePath = webPath.TrimStart('/');
+            if (pathBase == ".")
+            {
+                webPath = relativePath;
+            }
+            else
+            {
+                webPath = pathBase.TrimEnd('/') + "/" + relativePath;
+            }
+
             sb.AppendLine($"{indentStr}    /// <summary>");
             sb.AppendLine($"{indentStr}    /// Path: {webPath}");
             sb.AppendLine($"{indentStr}    /// </summary>");
@@ -257,7 +290,7 @@ public sealed class AssetGenerator : IIncrementalGenerator
 
         foreach (var child in node.Children.Where(c => !c.IsFile).OrderBy(c => c.Name))
         {
-            GenerateClass(sb, child, indent + 1);
+            GenerateClass(sb, child, indent + 1, pathBase);
         }
 
         sb.AppendLine($"{indentStr}}}");

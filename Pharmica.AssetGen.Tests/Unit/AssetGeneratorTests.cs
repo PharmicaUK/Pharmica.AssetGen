@@ -322,6 +322,124 @@ public class AssetGeneratorTests
     }
 
     [Test]
+    public async Task PathBase_PrefixesGeneratedPaths()
+    {
+        // Arrange
+        var generator = new AssetGenerator();
+        var additionalFiles = new[]
+        {
+            new TestAdditionalFile("/project/wwwroot/images/logo.png"),
+            new TestAdditionalFile("/project/wwwroot/css/style.css"),
+        };
+
+        var compilation = CreateCompilation();
+        var driver = CSharpGeneratorDriver
+            .Create(generator)
+            .AddAdditionalTexts(ImmutableArray.Create<AdditionalText>(additionalFiles))
+            .WithUpdatedAnalyzerConfigOptions(
+                new TestAnalyzerConfigOptionsProvider(
+                    new Dictionary<string, string>
+                    {
+                        ["build_property.AssetGen_PathBase"] = "/admin/v3",
+                    }
+                )
+            );
+
+        // Act
+        driver = (GeneratorDriver)
+            driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        // Assert
+        await Assert.That(diagnostics).IsEmpty();
+        var runResult = driver.GetRunResult();
+        var generatedCode = runResult.GeneratedTrees[0].ToString();
+        await Assert.That(generatedCode).Contains("LogoPng = \"/admin/v3/images/logo.png\"");
+        await Assert.That(generatedCode).Contains("StyleCss = \"/admin/v3/css/style.css\"");
+    }
+
+    [Test]
+    public async Task PathBase_Dot_GeneratesRelativePaths()
+    {
+        // Arrange
+        var generator = new AssetGenerator();
+        var additionalFiles = new[] { new TestAdditionalFile("/project/wwwroot/images/logo.png") };
+
+        var compilation = CreateCompilation();
+        var driver = CSharpGeneratorDriver
+            .Create(generator)
+            .AddAdditionalTexts(ImmutableArray.Create<AdditionalText>(additionalFiles))
+            .WithUpdatedAnalyzerConfigOptions(
+                new TestAnalyzerConfigOptionsProvider(
+                    new Dictionary<string, string> { ["build_property.AssetGen_PathBase"] = "." }
+                )
+            );
+
+        // Act
+        driver = (GeneratorDriver)
+            driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        // Assert
+        await Assert.That(diagnostics).IsEmpty();
+        var runResult = driver.GetRunResult();
+        var generatedCode = runResult.GeneratedTrees[0].ToString();
+        await Assert.That(generatedCode).Contains("LogoPng = \"images/logo.png\"");
+        await Assert.That(generatedCode).DoesNotContain("LogoPng = \"/images/logo.png\"");
+    }
+
+    [Test]
+    public async Task PathBase_DefaultBehavior_PreservesLeadingSlash()
+    {
+        // Arrange
+        var generator = new AssetGenerator();
+        var additionalFiles = new[] { new TestAdditionalFile("/project/wwwroot/images/logo.png") };
+
+        var compilation = CreateCompilation();
+        var driver = CreateDriver(generator, additionalFiles);
+
+        // Act
+        driver = (GeneratorDriver)
+            driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        // Assert
+        await Assert.That(diagnostics).IsEmpty();
+        var runResult = driver.GetRunResult();
+        var generatedCode = runResult.GeneratedTrees[0].ToString();
+        await Assert.That(generatedCode).Contains("LogoPng = \"/images/logo.png\"");
+    }
+
+    [Test]
+    public async Task PathBase_TrailingSlashNormalized()
+    {
+        // Arrange
+        var generator = new AssetGenerator();
+        var additionalFiles = new[] { new TestAdditionalFile("/project/wwwroot/images/logo.png") };
+
+        var compilation = CreateCompilation();
+        var driver = CSharpGeneratorDriver
+            .Create(generator)
+            .AddAdditionalTexts(ImmutableArray.Create<AdditionalText>(additionalFiles))
+            .WithUpdatedAnalyzerConfigOptions(
+                new TestAnalyzerConfigOptionsProvider(
+                    new Dictionary<string, string>
+                    {
+                        ["build_property.AssetGen_PathBase"] = "/admin/v3/",
+                    }
+                )
+            );
+
+        // Act
+        driver = (GeneratorDriver)
+            driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        // Assert
+        await Assert.That(diagnostics).IsEmpty();
+        var runResult = driver.GetRunResult();
+        var generatedCode = runResult.GeneratedTrees[0].ToString();
+        await Assert.That(generatedCode).Contains("LogoPng = \"/admin/v3/images/logo.png\"");
+        await Assert.That(generatedCode).DoesNotContain("//images");
+    }
+
+    [Test]
     public async Task CommonAssetExtensions_AllGenerated()
     {
         // Arrange

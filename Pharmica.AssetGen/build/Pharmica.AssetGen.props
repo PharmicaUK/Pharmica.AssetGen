@@ -4,7 +4,9 @@
     <AssetGen_ClassName Condition="'$(AssetGen_ClassName)' == ''">StaticAssets</AssetGen_ClassName>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Make the property available to the source generator -->
+    <!-- Make properties available to the source generator -->
     <CompilerVisibleProperty Include="AssetGen_ClassName" />
+    <CompilerVisibleProperty Include="AssetGen_FlattenExtensions" />
+    <CompilerVisibleProperty Include="AssetGen_PathBase" />
   </ItemGroup>
 </Project>

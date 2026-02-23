@@ -11,6 +11,6 @@
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.4.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.1.0" />
-    <PackageVersion Include="TUnit" Version="1.16.4" />
+    <PackageVersion Include="TUnit" Version="1.17.7" />
   </ItemGroup>
 </Project>

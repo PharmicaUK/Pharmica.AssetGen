@@ -5,9 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <RootNamespace>Pharmica.AssetGen.Tests.TestWebApp</RootNamespace>
-    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);../../../../.localnuget</RestoreAdditionalProjectSources>
     <!-- Disable central package management for this test project -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- The local package is rebuilt on every test run, so its hash changes: no lock file.
+         Its source (.localnuget) comes from Fixtures/nuget.config. -->
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <RestoreLockedMode>false</RestoreLockedMode>
   </PropertyGroup>
   <ItemGroup>
     <!--  Reference the packaged generator from local NuGet feed -->

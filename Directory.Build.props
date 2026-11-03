@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- Lock files pin every package, direct and transitive, to an exact version and hash.
+         CI restores in locked mode, so a changed dependency fails the build instead of
+         slipping in. After changing a version, run dotnet restore with force-evaluate. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+    <!-- Report known vulnerabilities in direct and transitive packages. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+  </PropertyGroup>
+</Project>

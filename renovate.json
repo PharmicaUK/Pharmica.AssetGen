@@ -1,0 +1,11 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>PharmicaUK/renovate"],
+  "packageRules": [
+    {
+      "description": "The Roslyn version the generator compiles against sets the oldest .NET SDK consumers can use, so it is raised deliberately, not by Renovate",
+      "matchPackageNames": ["Microsoft.CodeAnalysis.CSharp"],
+      "enabled": false
+    }
+  ]
+}

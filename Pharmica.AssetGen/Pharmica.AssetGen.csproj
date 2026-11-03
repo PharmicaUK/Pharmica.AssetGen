@@ -27,8 +27,9 @@
     <!-- Repository Information -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- No .snupkg: the generator's .pdb ships next to the DLL in analyzers/dotnet/cs, and a
+         symbols package with no build output and no dependencies fails to pack (NU5017). -->
+    <IncludeSymbols>false</IncludeSymbols>
     <!-- Deterministic Build -->
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'"
       >true</ContinuousIntegrationBuild
@@ -67,7 +68,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <!-- PrivateAssets: the compiler supplies Roslyn at build time, so it must not become a
+         dependency of the package (1.1.0 and earlier listed it, pulling Roslyn into every
+         consumer's restore). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 </Project>

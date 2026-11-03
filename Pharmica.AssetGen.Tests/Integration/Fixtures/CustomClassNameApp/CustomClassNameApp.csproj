@@ -5,9 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <RootNamespace>Pharmica.AssetGen.Tests.CustomClassNameApp</RootNamespace>
-    <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);../../../../.localnuget</RestoreAdditionalProjectSources>
     <!-- Disable central package management for this test project -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- The local package is rebuilt on every test run, so its hash changes: no lock file.
+         Its source (.localnuget) comes from Fixtures/nuget.config. -->
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    <RestoreLockedMode>false</RestoreLockedMode>
     <!-- Configure custom class name -->
     <AssetGen_ClassName>MyCustomAssets</AssetGen_ClassName>
   </PropertyGroup>

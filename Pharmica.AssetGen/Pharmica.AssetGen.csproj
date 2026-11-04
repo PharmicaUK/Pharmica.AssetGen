@@ -32,8 +32,7 @@
     <IncludeSymbols>false</IncludeSymbols>
     <!-- Deterministic Build -->
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'"
-      >true</ContinuousIntegrationBuild
-    >
+      >true</ContinuousIntegrationBuild>
     <Deterministic>true</Deterministic>
     <!-- Package Validation -->
     <EnablePackageValidation>true</EnablePackageValidation>
